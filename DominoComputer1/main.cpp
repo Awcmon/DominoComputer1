@@ -1,9 +1,10 @@
-//SpaceDot2 03.15.15
+//DominoComputer1 03.27.15
 #include "SDL.h"
 #include "math.h"
 #include "AWindow.h"
 #include "AMouse.h"
 #include "AwcVector2D.h"
+#include "AwcUtility.h"
 
 #define FRAMES_PER_SECOND 120
 #define MS_PER_FRAME 8
@@ -46,6 +47,20 @@ int main(int argc, char* args[])
 			{
 				quit = true;
 			}
+
+			if (e.type == SDL_MOUSEWHEEL)
+			{
+				if (e.wheel.y < 0)
+				{
+					PPB -= Clamp((int)round(PPB/8),1,1000);
+				}
+				else if (e.wheel.y > 0)
+				{
+					PPB += Clamp((int)round(PPB/8),1,1000);
+				}
+				PPB = Clamp(PPB, 1, 1000);
+				printf("PPB: %d\n", PPB);
+			}
 		}
 
 		mouse.think();
@@ -82,18 +97,23 @@ int main(int argc, char* args[])
 				SDL_RenderDrawPoint(gRenderer, (int)Pos2Scr(dpos).x, (int)Pos2Scr(dpos).y);
 			}
 		}*/
+		SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0xFF);
+		Vector2D opos(0, 0);
+		SDL_RenderDrawPoint(gRenderer, (int)Pos2Scr(opos).x, (int)Pos2Scr(opos).y);
+
 		//Draw grid
 		SDL_SetRenderDrawColor(gRenderer, 150, 150, 150, 0xFF);
-		for (int i = (int)round(camPos.x - ((SCREEN_WIDTH / 2) / PPB)); i <= (int)round(camPos.x + 0.5 + ((SCREEN_WIDTH / 2) / PPB)); i++)
+		for (int i = (int)round(camPos.x - 2 - ((SCREEN_WIDTH / 2) / PPB)); i <= (int)round(camPos.x + 1 + ((SCREEN_WIDTH / 2) / PPB)); i++)
 		{
 			Vector2D dpos(i+0.5f, 0);
 			SDL_RenderDrawLine(gRenderer, (int)Pos2Scr(dpos).x, 0, (int)Pos2Scr(dpos).x, SCREEN_HEIGHT);
 		}
-		for (int k = (int)round(camPos.y - ((SCREEN_HEIGHT / 2) / PPB)); k <= (int)round(camPos.y + ((SCREEN_HEIGHT / 2) / PPB)); k++)
+		for (int k = (int)round(camPos.y - 2 - ((SCREEN_HEIGHT / 2) / PPB)); k <= (int)round(camPos.y + 1 + ((SCREEN_HEIGHT / 2) / PPB)); k++)
 		{
 			Vector2D dpos(0, k + 0.5f);
 			SDL_RenderDrawLine(gRenderer, 0, (int)Pos2Scr(dpos).y, SCREEN_WIDTH, (int)Pos2Scr(dpos).y);
 		}
+
 		//Draw Mouse
 		SDL_SetRenderDrawColor(gRenderer, 50, 50, 50, 0xFF);
 		Vector2D dpos(round(Scr2Pos(mouse.pos).x), round(Scr2Pos(mouse.pos).y));

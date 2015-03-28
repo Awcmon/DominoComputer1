@@ -70,6 +70,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AMouse.cpp" />
+    <ClCompile Include="ARender.cpp" />
+    <ClCompile Include="ASurface.cpp" />
     <ClCompile Include="AwcColor.cpp" />
     <ClCompile Include="AwcUtility.cpp" />
     <ClCompile Include="AwcVector2D.cpp" />
@@ -79,6 +81,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AMouse.h" />
+    <ClInclude Include="ARender.h" />
+    <ClInclude Include="ASurface.h" />
     <ClInclude Include="AwcColor.h" />
     <ClInclude Include="AwcUtility.h" />
     <ClInclude Include="AwcVector2D.h" />
