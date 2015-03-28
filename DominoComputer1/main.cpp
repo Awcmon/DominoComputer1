@@ -76,6 +76,7 @@ int main(int argc, char* args[])
 			{
 				Node* newNode = new Node(mpos);
 				nodes.push_back(newNode);
+				printf("Number of nodes: %d\n", nodes.size());
 			}
 		}
 
@@ -112,16 +113,19 @@ int main(int argc, char* args[])
 		renderDrawPoint(Vector2D(0, 0));
 
 		//Draw grid.
-		SDL_SetRenderDrawColor(gRenderer, 150, 150, 150, 0xFF);
-		for (int i = (int)round(camPos.x - 2 - ((SCREEN_WIDTH / 2) / PPB)); i <= (int)round(camPos.x + 1 + ((SCREEN_WIDTH / 2) / PPB)); i++)
+		if (PPB > 5)
 		{
-			Vector2D dpos(i+0.5f, 0);
-			SDL_RenderDrawLine(gRenderer, (int)Pos2Scr(dpos).x, 0, (int)Pos2Scr(dpos).x, SCREEN_HEIGHT);
-		}
-		for (int k = (int)round(camPos.y - 2 - ((SCREEN_HEIGHT / 2) / PPB)); k <= (int)round(camPos.y + 1 + ((SCREEN_HEIGHT / 2) / PPB)); k++)
-		{
-			Vector2D dpos(0, k + 0.5f);
-			SDL_RenderDrawLine(gRenderer, 0, (int)Pos2Scr(dpos).y, SCREEN_WIDTH, (int)Pos2Scr(dpos).y);
+			SDL_SetRenderDrawColor(gRenderer, 150, 150, 150, 0xFF);
+			for (int i = (int)round(camPos.x - 2 - ((SCREEN_WIDTH / 2) / PPB)); i <= (int)round(camPos.x + 1 + ((SCREEN_WIDTH / 2) / PPB)); i++)
+			{
+				Vector2D dpos(i + 0.5f, 0);
+				SDL_RenderDrawLine(gRenderer, (int)Pos2Scr(dpos).x, 0, (int)Pos2Scr(dpos).x, SCREEN_HEIGHT);
+			}
+			for (int k = (int)round(camPos.y - 2 - ((SCREEN_HEIGHT / 2) / PPB)); k <= (int)round(camPos.y + 1 + ((SCREEN_HEIGHT / 2) / PPB)); k++)
+			{
+				Vector2D dpos(0, k + 0.5f);
+				SDL_RenderDrawLine(gRenderer, 0, (int)Pos2Scr(dpos).y, SCREEN_WIDTH, (int)Pos2Scr(dpos).y);
+			}
 		}
 
 		//Draw Mouse

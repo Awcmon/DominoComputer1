@@ -4,14 +4,12 @@ Node::Node()
 {
 	pos = Vector2D(0, 0);
 	vel = Vector2D(0, 0);
-	printf("Node placed!\n");
 }
 
 Node::Node(Vector2D _pos)
 {
 	pos = _pos;
 	vel = Vector2D(0, 0);
-	printf("Node placed!\n");
 }
 
 Node::~Node()
