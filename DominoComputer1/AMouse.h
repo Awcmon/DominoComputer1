@@ -24,6 +24,7 @@ public:
 	bool m2isDown;
 	bool m2up;
 
+private:
 	//M1 control vars
 	bool m1downCont;
 	bool m1upCont;

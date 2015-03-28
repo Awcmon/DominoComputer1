@@ -2,6 +2,8 @@
 
 #include "AwcVector2D.h"
 #include <vector>
+#include "SDL.h"
+#include "ARender.h"
 
 class Node
 {
@@ -11,6 +13,7 @@ public:
 	~Node();
 
 	Vector2D setPos(Vector2D _pos);
+	void remove();
 
 	void think();
 	void render();

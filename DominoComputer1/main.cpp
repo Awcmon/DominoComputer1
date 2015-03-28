@@ -5,6 +5,9 @@
 #include "AMouse.h"
 #include "AwcVector2D.h"
 #include "AwcUtility.h"
+#include "ARender.h"
+#include "ASurface.h"
+#include "Node.h"
 
 #define FRAMES_PER_SECOND 120
 #define MS_PER_FRAME 8
@@ -17,29 +20,25 @@ Vector2D camPos;
 SDL_Window *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
 
-Vector2D Pos2Scr(Vector2D _pos)
-{
-	return Vector2D((SCREEN_WIDTH/2) + (_pos.x-camPos.x)*PPB, (SCREEN_HEIGHT/2) - (_pos.y-camPos.y)*PPB);
-}
-
-Vector2D Scr2Pos(Vector2D _pos)
-{
-	return Vector2D(((_pos.x - (SCREEN_WIDTH / 2)) / PPB) + camPos.x, ((-_pos.y + (SCREEN_HEIGHT / 2)) / PPB) + camPos.y);
-}
-
+AMouse mouse;
 /*---------------Main---------------*/
 int main(int argc, char* args[])
 {
 	AWindow window;
-	AMouse mouse;
 
 	SDL_Event e;
 
 	bool quit = false;
 
+	std::vector<Node*> nodes;
+
 	while (!quit)
 	{
 		int start = SDL_GetTicks();
+
+		mouse.think();
+		//Grid pos the mouse is on.
+		Vector2D mpos(round(Scr2Pos(mouse.pos).x), round(Scr2Pos(mouse.pos).y));
 
 		while (SDL_PollEvent(&e) != 0)
 		{
@@ -63,7 +62,22 @@ int main(int argc, char* args[])
 			}
 		}
 
-		mouse.think();
+		if (mouse.m1isDown)
+		{
+			bool isFilled = false;
+			for (int i = 0; i < nodes.size(); i++)
+			{
+				if (nodes[i]->pos == mpos)
+				{
+					isFilled = true;
+				}
+			}
+			if (!isFilled)
+			{
+				Node* newNode = new Node(mpos);
+				nodes.push_back(newNode);
+			}
+		}
 
 		const Uint8 *state = SDL_GetKeyboardState(NULL);
 
@@ -87,21 +101,17 @@ int main(int argc, char* args[])
 		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 		SDL_RenderClear(gRenderer);
 
-		/*Draw dots
-		SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0xFF);
-		for (int i = (int)round(camPos.x - ((SCREEN_WIDTH / 2) / PPB)); i <= (int)round(camPos.x + ((SCREEN_WIDTH / 2) / PPB)); i++)
+		//Render nodes.
+		for (int i = 0; i < nodes.size(); i++)
 		{
-			for (int k = (int)round(camPos.y - ((SCREEN_HEIGHT / 2) / PPB)); k <= (int)round(camPos.y + ((SCREEN_HEIGHT / 2) / PPB)); k++)
-			{
-				Vector2D dpos((float)i, (float)k);
-				SDL_RenderDrawPoint(gRenderer, (int)Pos2Scr(dpos).x, (int)Pos2Scr(dpos).y);
-			}
-		}*/
-		SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0xFF);
-		Vector2D opos(0, 0);
-		SDL_RenderDrawPoint(gRenderer, (int)Pos2Scr(opos).x, (int)Pos2Scr(opos).y);
+			nodes[i]->render();
+		}
 
-		//Draw grid
+		//Draw origin dot
+		SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0xFF);
+		renderDrawPoint(Vector2D(0, 0));
+
+		//Draw grid.
 		SDL_SetRenderDrawColor(gRenderer, 150, 150, 150, 0xFF);
 		for (int i = (int)round(camPos.x - 2 - ((SCREEN_WIDTH / 2) / PPB)); i <= (int)round(camPos.x + 1 + ((SCREEN_WIDTH / 2) / PPB)); i++)
 		{
@@ -116,9 +126,7 @@ int main(int argc, char* args[])
 
 		//Draw Mouse
 		SDL_SetRenderDrawColor(gRenderer, 50, 50, 50, 0xFF);
-		Vector2D dpos(round(Scr2Pos(mouse.pos).x), round(Scr2Pos(mouse.pos).y));
-		SDL_Rect box{ Pos2Scr(dpos).x-PPB/2, Pos2Scr(dpos).y-PPB/2, PPB, PPB };
-		SDL_RenderDrawRect(gRenderer, &box);
+		renderDrawRect(mpos, 1, 1);
 
 		SDL_RenderPresent(gRenderer);
 
