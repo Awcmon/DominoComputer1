@@ -2,7 +2,7 @@
 
 //More of a window manager.
 
-#include "SDL.h"
+#include <SDL.h>
 #include "SDL_image.h"
 #include "Globals.h"
 

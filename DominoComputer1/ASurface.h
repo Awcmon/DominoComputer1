@@ -1,6 +1,6 @@
 #pragma once
 //Surface is for drawing stuff on the screen in screen positions and pixels.
-#include "SDL.h"
+#include <SDL.h>
 #include "AwcVector2D.h"
 
 extern SDL_Renderer* gRenderer;

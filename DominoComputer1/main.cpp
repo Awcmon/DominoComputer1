@@ -1,5 +1,11 @@
 //DominoComputer1 03.27.15
-#include "SDL.h"
+#include <vector>
+#include <algorithm>
+
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_ttf.h>
+
 #include "math.h"
 #include "AWindow.h"
 #include "AMouse.h"
@@ -17,10 +23,44 @@ int SCREEN_HEIGHT = 768;
 int PPB = 64;
 Vector2D camPos;
 
+int updateDelay = 250;
+
 SDL_Window *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
 
+std::vector<Node*> nodes;
+std::vector<Node*> curActiveNodes;
+std::vector<Node*> nextActiveNodes;
+std::vector<Node*> nodesToRemove;
+
+int simState;
+
 AMouse mouse;
+
+void SimReset()
+{
+	//Set all non-inputs to regular.
+	for (int i = 0; i < (int)nodes.size(); i++)
+	{
+		if (nodes[i]->val != 3)
+		{
+			nodes[i]->val = 1;
+		}
+		nodes[i]->adjacent.clear();
+	}
+	//Add all input nodes to active nodes.
+	curActiveNodes.clear();
+	nextActiveNodes.clear();
+	for (int i = 0; i < (int)nodes.size(); i++)
+	{
+		if (nodes[i]->val == 3)
+		{
+			PushNode(nodes[i], curActiveNodes);
+		}
+	}
+	printf("CurSize %d\n", curActiveNodes.size());
+}
+
 /*---------------Main---------------*/
 int main(int argc, char* args[])
 {
@@ -30,7 +70,10 @@ int main(int argc, char* args[])
 
 	bool quit = false;
 
-	std::vector<Node*> nodes;
+	//0 = pause, 1 = moving, -1 = stopped
+	simState = -1;
+
+	int lastUpdate = 0;
 
 	while (!quit)
 	{
@@ -60,50 +103,133 @@ int main(int argc, char* args[])
 				PPB = Clamp(PPB, 1, 1000);
 				printf("PPB: %d\n", PPB);
 			}
+
+			if (e.type == SDL_KEYDOWN)
+			{
+				switch (e.key.keysym.sym)
+				{
+				case SDLK_SPACE:
+					if (simState == -1)
+					{
+						//Start simulation
+						SimReset();
+						simState = 1;
+						printf("Started.\n");
+					}
+					else if (simState == 0)
+					{
+						simState = 1;
+						printf("Resumed.\n");
+					}
+					else
+					{
+						//Pause
+						simState = 0;
+						printf("Paused.\n");
+					}
+					break;
+				case SDLK_r:
+					if (simState != -1)
+					{
+						//Stop sim.
+						SimReset();
+						simState = -1;
+						printf("Stopped.\n");
+						break;
+					}
+					else
+					{
+						//Start simulation
+						SimReset();
+						simState = 1;
+						printf("Started.\n");
+					}
+				}
+			}
 		}
 
-		if (mouse.m1isDown)
+		//Node logic if simulation is running and it is time to update.
+		if (simState == 1 && ((lastUpdate + updateDelay) < (int)SDL_GetTicks()))
+		{
+			for (int i = 0; i < (int)curActiveNodes.size(); i++)
+			{
+				if (curActiveNodes[i]->val > 0)
+				{
+					if (curActiveNodes[i]->think() == 0)
+					{
+						break;
+					}
+				}
+			}
+			curActiveNodes.clear();
+			curActiveNodes = nextActiveNodes;
+			nextActiveNodes.clear();
+			lastUpdate = SDL_GetTicks();
+		}
+
+		if (mouse.m1isDown || mouse.m2isDown)
 		{
 			bool isFilled = false;
-			for (int i = 0; i < nodes.size(); i++)
+			int fillID = 0;
+			for (int i = 0; i < (int)nodes.size(); i++)
 			{
 				if (nodes[i]->pos == mpos)
 				{
 					isFilled = true;
+					fillID = i;
 				}
 			}
-			if (!isFilled)
+
+			if (!isFilled && mouse.m1isDown)
 			{
 				Node* newNode = new Node(mpos);
 				nodes.push_back(newNode);
-				printf("Number of nodes: %d\n", nodes.size());
+				printf("Node added, Num nodes: %d\n", nodes.size());
+			}
+			else if (isFilled && mouse.m2isDown)
+			{
+				RemoveNode(nodes[fillID]);
+				printf("Node removed, Num nodes: %d\n", nodes.size()-1);
+			}
+			
+			if (isFilled && mouse.m1down)
+			{
+				if (nodes[fillID]->val == 1)
+				{ 
+					nodes[fillID]->val = 3;
+				}
+				else
+				{
+					nodes[fillID]->val = 1;
+				}
 			}
 		}
 
 		const Uint8 *state = SDL_GetKeyboardState(NULL);
 
+		float vel = 2 / (float)sqrt(PPB);
 		if (state[SDL_SCANCODE_A])
 		{
-			camPos.x -= 0.1f;
+			camPos.x -= vel;
 		}
 		if (state[SDL_SCANCODE_D])
 		{
-			camPos.x += 0.1f;
+			camPos.x += vel;
 		}
 		if (state[SDL_SCANCODE_W])
 		{
-			camPos.y += 0.1f;
+			camPos.y += vel;
 		}
 		if (state[SDL_SCANCODE_S])
 		{
-			camPos.y -= 0.1f;
+			camPos.y -= vel;
 		}
 
 		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 		SDL_RenderClear(gRenderer);
 
 		//Render nodes.
-		for (int i = 0; i < nodes.size(); i++)
+		for (int i = 0; i < (int)nodes.size(); i++)
 		{
 			nodes[i]->render();
 		}
@@ -133,6 +259,13 @@ int main(int argc, char* args[])
 		renderDrawRect(mpos, 1, 1);
 
 		SDL_RenderPresent(gRenderer);
+
+		for (int i = 0; i < (int)nodesToRemove.size(); i++)
+		{
+			nodes.erase(std::remove(nodes.begin(), nodes.end(), nodesToRemove[i]), nodes.end());
+			delete nodesToRemove[i];
+		}
+		nodesToRemove.clear();
 
 		if (!quit)
 		{
