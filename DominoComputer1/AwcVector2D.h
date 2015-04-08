@@ -25,6 +25,7 @@ public:
 	Vector2D operator/(float fl);
 	bool operator==(const Vector2D &v);
 	bool operator!=(const Vector2D &v);
+	bool operator<(const Vector2D &v) const;
 	friend std::ostream& operator<<(std::ostream& os, const Vector2D &v);
 	//Funcs
 	float Length();

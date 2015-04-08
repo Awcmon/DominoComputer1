@@ -2,6 +2,7 @@
 
 #include "AwcVector2D.h"
 #include <vector>
+#include <map>
 #include <SDL.h>
 #include "ARender.h"
 #include "AwcUtility.h"

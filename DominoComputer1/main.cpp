@@ -1,6 +1,7 @@
 //DominoComputer1 03.27.15
 #include <vector>
 #include <algorithm>
+#include <map>
 
 #include <SDL.h>
 #include <SDL_image.h>
@@ -23,7 +24,7 @@ int SCREEN_HEIGHT = 768;
 int PPB = 64;
 Vector2D camPos;
 
-int updateDelay = 250;
+int updateDelay = 50;
 
 SDL_Window *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
@@ -32,6 +33,7 @@ std::vector<Node*> nodes;
 std::vector<Node*> curActiveNodes;
 std::vector<Node*> nextActiveNodes;
 std::vector<Node*> nodesToRemove;
+std::map<Vector2D, Node*> nodeMap;
 
 int simState;
 
@@ -39,6 +41,7 @@ AMouse mouse;
 
 void SimReset()
 {
+	nodeMap.clear();
 	//Set all non-inputs to regular.
 	for (int i = 0; i < (int)nodes.size(); i++)
 	{
@@ -47,6 +50,10 @@ void SimReset()
 			nodes[i]->val = 1;
 		}
 		nodes[i]->adjacent.clear();
+
+		//Fill node map
+		//nodeMap[nodes[i]->pos] = nodes[i];
+		nodeMap.insert(std::pair<Vector2D, Node*>(nodes[i]->pos, nodes[i]));
 	}
 	//Add all input nodes to active nodes.
 	curActiveNodes.clear();
@@ -167,40 +174,43 @@ int main(int argc, char* args[])
 			lastUpdate = SDL_GetTicks();
 		}
 
-		if (mouse.m1isDown || mouse.m2isDown)
+		if (simState == -1)
 		{
-			bool isFilled = false;
-			int fillID = 0;
-			for (int i = 0; i < (int)nodes.size(); i++)
+			if (mouse.m1isDown || mouse.m2isDown)
 			{
-				if (nodes[i]->pos == mpos)
+				bool isFilled = false;
+				int fillID = 0;
+				for (int i = 0; i < (int)nodes.size(); i++)
 				{
-					isFilled = true;
-					fillID = i;
+					if (nodes[i]->pos == mpos)
+					{
+						isFilled = true;
+						fillID = i;
+					}
 				}
-			}
 
-			if (!isFilled && mouse.m1isDown)
-			{
-				Node* newNode = new Node(mpos);
-				nodes.push_back(newNode);
-				printf("Node added, Num nodes: %d\n", nodes.size());
-			}
-			else if (isFilled && mouse.m2isDown)
-			{
-				RemoveNode(nodes[fillID]);
-				printf("Node removed, Num nodes: %d\n", nodes.size()-1);
-			}
-			
-			if (isFilled && mouse.m1down)
-			{
-				if (nodes[fillID]->val == 1)
-				{ 
-					nodes[fillID]->val = 3;
-				}
-				else
+				if (!isFilled && mouse.m1isDown)
 				{
-					nodes[fillID]->val = 1;
+					Node* newNode = new Node(mpos);
+					nodes.push_back(newNode);
+					printf("Node added, Num nodes: %d\n", nodes.size());
+				}
+				else if (isFilled && mouse.m2isDown)
+				{
+					RemoveNode(nodes[fillID]);
+					printf("Node removed, Num nodes: %d\n", nodes.size() - 1);
+				}
+
+				if (isFilled && mouse.m1down)
+				{
+					if (nodes[fillID]->val == 1)
+					{
+						nodes[fillID]->val = 3;
+					}
+					else
+					{
+						nodes[fillID]->val = 1;
+					}
 				}
 			}
 		}

@@ -44,6 +44,15 @@ bool Vector2D::operator!=(const Vector2D &v)
 	return (v.x != x) || (v.y != y);
 }
 
+bool Vector2D::operator<(const Vector2D &v) const
+{
+	if (x == v.x)
+	{
+		return y < v.y;
+	}
+	return x < v.x;
+}
+
 std::ostream& operator<<(std::ostream& os, const Vector2D &v)
 {
 	os << "Vector2D( " << v.x << " , " << v.y << " )";

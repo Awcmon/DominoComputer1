@@ -4,6 +4,7 @@ extern std::vector<Node*> nodes;
 extern std::vector<Node*> curActiveNodes;
 extern std::vector<Node*> nextActiveNodes;
 extern std::vector<Node*> nodesToRemove;
+extern std::map<Vector2D, Node*> nodeMap;
 extern int simState;
 
 void RemoveNode(Node* node)
@@ -82,6 +83,7 @@ int Node::think()
 	if ((val == 2) || (val == 3))
 	{
 		//Find adjacent nodes
+		/*old method that looped through all and checked pos
 		for (int i = 0; i < (int)nodes.size(); i++)
 		{
 			for (int k = 0; k < 8; k++)
@@ -93,7 +95,18 @@ int Node::think()
 				}
 			}
 		}
+		*/
 
+		//Using maps
+		for (int i = 0; i < 8; i++)
+		{
+			Vector2D cpos(pos.x + round(cos(i*(Pi() / 4))), pos.y + round(sin(i*(Pi() / 4))));
+			if (nodeMap[cpos] != NULL)
+			{
+				PushNode(nodeMap[cpos], adjacent);
+			}
+		}
+		
 		//if input node
 		if (val == 3)
 		{
