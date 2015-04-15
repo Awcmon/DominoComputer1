@@ -42,6 +42,12 @@
     <ClCompile Include="ARender.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ATexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AFont.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AMouse.h">
@@ -69,6 +75,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ARender.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ATexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AFont.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -20,3 +20,4 @@ void renderDrawRect(Vector2D pos, float w, float h);
 void renderDrawFillRect(Vector2D pos, float w, float h);
 void renderDrawQuad(Vector2D p1, Vector2D p2);
 void renderDrawFillQuad(Vector2D p1, Vector2D p2);
+void renderDrawTexturedRect(Vector2D pos, float w, float h);

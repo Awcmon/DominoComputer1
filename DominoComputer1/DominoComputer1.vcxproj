@@ -76,9 +76,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AFont.cpp" />
     <ClCompile Include="AMouse.cpp" />
     <ClCompile Include="ARender.cpp" />
     <ClCompile Include="ASurface.cpp" />
+    <ClCompile Include="ATexture.cpp" />
     <ClCompile Include="AwcColor.cpp" />
     <ClCompile Include="AwcUtility.cpp" />
     <ClCompile Include="AwcVector2D.cpp" />
@@ -87,9 +89,11 @@
     <ClCompile Include="Node.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AFont.h" />
     <ClInclude Include="AMouse.h" />
     <ClInclude Include="ARender.h" />
     <ClInclude Include="ASurface.h" />
+    <ClInclude Include="ATexture.h" />
     <ClInclude Include="AwcColor.h" />
     <ClInclude Include="AwcUtility.h" />
     <ClInclude Include="AwcVector2D.h" />

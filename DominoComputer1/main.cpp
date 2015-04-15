@@ -15,19 +15,22 @@
 #include "ARender.h"
 #include "ASurface.h"
 #include "Node.h"
+#include "AFont.h"
 
 #define FRAMES_PER_SECOND 120
 #define MS_PER_FRAME 8
 
 int SCREEN_WIDTH = 1024;
 int SCREEN_HEIGHT = 768;
-int PPB = 64;
+int PPM = 64;
 Vector2D camPos;
 
 int updateDelay = 50;
 
 SDL_Window *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
+
+ASurface surface;
 
 std::vector<Node*> nodes;
 std::vector<Node*> curActiveNodes;
@@ -82,6 +85,14 @@ int main(int argc, char* args[])
 
 	int lastUpdate = 0;
 
+	/*Test test 1
+	SDL_Color textColor = { 0, 0, 0 };
+	AFont gfont("resource/FFFBusiness.ttf", 32);
+	ATexture text(TTF_RenderText_Solid(gfont.font, "rip", textColor));
+	*/
+
+	surface.CreateFont("FFFBusiness32", "resource/FFFBusiness.ttf", 32);
+
 	while (!quit)
 	{
 		int start = SDL_GetTicks();
@@ -101,14 +112,14 @@ int main(int argc, char* args[])
 			{
 				if (e.wheel.y < 0)
 				{
-					PPB -= Clamp((int)round(PPB/8),1,1000);
+					PPM -= Clamp((int)round(PPM/8),1,1000);
 				}
 				else if (e.wheel.y > 0)
 				{
-					PPB += Clamp((int)round(PPB/8),1,1000);
+					PPM += Clamp((int)round(PPM/8),1,1000);
 				}
-				PPB = Clamp(PPB, 1, 1000);
-				printf("PPB: %d\n", PPB);
+				PPM = Clamp(PPM, 1, 1000);
+				printf("PPM: %d\n", PPM);
 			}
 
 			if (e.type == SDL_KEYDOWN)
@@ -217,7 +228,7 @@ int main(int argc, char* args[])
 
 		const Uint8 *state = SDL_GetKeyboardState(NULL);
 
-		float vel = 2 / (float)sqrt(PPB);
+		float vel = 2 / (float)sqrt(PPM);
 		if (state[SDL_SCANCODE_A])
 		{
 			camPos.x -= vel;
@@ -249,20 +260,40 @@ int main(int argc, char* args[])
 		renderDrawPoint(Vector2D(0, 0));
 
 		//Draw grid.
-		if (PPB > 5)
+		if (PPM > 5)
 		{
 			SDL_SetRenderDrawColor(gRenderer, 150, 150, 150, 0xFF);
-			for (int i = (int)round(camPos.x - 2 - ((SCREEN_WIDTH / 2) / PPB)); i <= (int)round(camPos.x + 1 + ((SCREEN_WIDTH / 2) / PPB)); i++)
+			for (int i = (int)round(camPos.x - 2 - ((SCREEN_WIDTH / 2) / PPM)); i <= (int)round(camPos.x + 1 + ((SCREEN_WIDTH / 2) / PPM)); i++)
 			{
 				Vector2D dpos(i + 0.5f, 0);
 				SDL_RenderDrawLine(gRenderer, (int)Pos2Scr(dpos).x, 0, (int)Pos2Scr(dpos).x, SCREEN_HEIGHT);
 			}
-			for (int k = (int)round(camPos.y - 2 - ((SCREEN_HEIGHT / 2) / PPB)); k <= (int)round(camPos.y + 1 + ((SCREEN_HEIGHT / 2) / PPB)); k++)
+			for (int k = (int)round(camPos.y - 2 - ((SCREEN_HEIGHT / 2) / PPM)); k <= (int)round(camPos.y + 1 + ((SCREEN_HEIGHT / 2) / PPM)); k++)
 			{
 				Vector2D dpos(0, k + 0.5f);
 				SDL_RenderDrawLine(gRenderer, 0, (int)Pos2Scr(dpos).y, SCREEN_WIDTH, (int)Pos2Scr(dpos).y);
 			}
 		}
+
+		/*Text test 1
+		surface.SetTexture(&text);
+		renderDrawTexturedRect(Vector2D(0, 0),1,1);
+		*/
+		
+		/*Text test 2
+		surface.SetFont("FFFBusiness32");
+		std::string message = "Test string.";
+		ATexture* text = surface.GetTextTexture(message);
+		Vector2D textDim = surface.GetTextDimensions(message);
+		surface.SetTexture(text);
+		renderDrawTexturedRect(Vector2D(0, 0), (int)(textDim.x/32), (int)(textDim.y/32));
+		*/
+
+		//Text test 3
+		surface.SetFont("FFFBusiness32");
+		surface.DrawText("Test message.", Vector2D(10, 10));
+
+
 
 		//Draw Mouse
 		SDL_SetRenderDrawColor(gRenderer, 50, 50, 50, 0xFF);
