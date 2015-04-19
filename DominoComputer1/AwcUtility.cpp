@@ -125,7 +125,8 @@ void RandSeedTime()
 
 int RandInt(int s, int e)
 {
-    return s + rand()%(e-s);
+	//return s + rand()%abs(e-s);
+	return e - (rand() % abs(e - s));
 }
 
 //float from 0-1
@@ -137,4 +138,17 @@ float RandF()
 int RandIntNoRep(int s, int e)
 {
     return 0;
+}
+
+/*04.18.15
+//Woops didn't realize I've already written a function for this.
+int RandInt(int min, int max)
+{
+	return max - (rand() % abs(max - min));
+}
+*/
+
+float Random(float min, float max)
+{
+	return min + ((float)rand()) / ( (RAND_MAX / (max - min)));
 }

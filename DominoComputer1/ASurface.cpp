@@ -17,9 +17,136 @@ void ASurface::DrawPoint(Vector2D pos)
 	SDL_RenderDrawPoint(gRenderer, (int)pos.x, (int)pos.y);
 }
 
+void ASurface::DrawPoint(int x, int y)
+{
+	SDL_RenderDrawPoint(gRenderer, x, y);
+}
+
 void ASurface::DrawLine(Vector2D p1, Vector2D p2)
 {
 	SDL_RenderDrawLine(gRenderer, (int)p1.x, (int)p1.y, (int)p2.x, (int)p2.y);
+}
+
+void ASurface::DrawLine(int x1, int y1, int x2, int y2)
+{
+	SDL_RenderDrawLine(gRenderer, x1, y1, x2, y2);
+}
+
+void ASurface::DrawCircle(Vector2D pos, int rad) //Took this code from user Fourier on Facepunch, 04.19.15 Facepunch WAYWO thread.
+{
+	if (rad < 0)
+		rad *= -1;
+
+	int d = (5 - rad * 4) / 4;
+	int x = 0;
+	int y = rad;
+
+	while (x <= y)
+	{
+		if (pos.x + x >= 0 && pos.x + x <= SCREEN_WIDTH - 1 && pos.y + y >= 0 && pos.y + y <= SCREEN_HEIGHT - 1)
+			DrawPoint((int)pos.x + x, (int)pos.y + y);
+		if ((int)pos.x + x >= 0 && (int)pos.x + x <= SCREEN_WIDTH - 1 && (int)pos.y - y >= 0 && (int)pos.y - y <= SCREEN_HEIGHT - 1)
+			DrawPoint((int)pos.x + x, (int)pos.y - y);
+		if ((int)pos.x - x >= 0 && (int)pos.x - x <= SCREEN_WIDTH - 1 && (int)pos.y + y >= 0 && (int)pos.y + y <= SCREEN_HEIGHT - 1)
+			DrawPoint((int)pos.x - x, (int)pos.y + y);
+		if ((int)pos.x - x >= 0 && (int)pos.x - x <= SCREEN_WIDTH - 1 && (int)pos.y - y >= 0 && (int)pos.y - y <= SCREEN_HEIGHT - 1)
+			DrawPoint((int)pos.x - x, (int)pos.y - y);
+		if ((int)pos.x + y >= 0 && (int)pos.x + y <= SCREEN_WIDTH - 1 && (int)pos.y + x >= 0 && (int)pos.y + x <= SCREEN_HEIGHT - 1)
+			DrawPoint((int)pos.x + y, (int)pos.y + x);
+		if ((int)pos.x + y >= 0 && (int)pos.x + y <= SCREEN_WIDTH - 1 && (int)pos.y - x >= 0 && (int)pos.y - x <= SCREEN_HEIGHT - 1)
+			DrawPoint((int)pos.x + y, (int)pos.y - x);
+		if ((int)pos.x - y >= 0 && (int)pos.x - y <= SCREEN_WIDTH - 1 && (int)pos.y + x >= 0 && (int)pos.y + x <= SCREEN_HEIGHT - 1)
+			DrawPoint((int)pos.x - y, (int)pos.y + x);
+		if ((int)pos.x - y >= 0 && (int)pos.x - y <= SCREEN_WIDTH - 1 && (int)pos.y - x >= 0 && (int)pos.y - x <= SCREEN_HEIGHT - 1)
+			DrawPoint((int)pos.x - y, (int)pos.y - x);
+
+		if (d < 0) {
+			d += 2 * x + 1;
+		}
+		else {
+			d += 2 * (x - y) + 1;
+			y--;
+		}
+		x++;
+	}
+}
+
+void ASurface::DrawCircleFill(Vector2D pos, int rad)
+{
+	/*Draw Icecream Cone
+	if (rad < 0)
+		rad *= -1;
+
+	int d = (5 - rad * 4) / 4;
+	int x = 0;
+	int y = rad;
+
+	while (x <= y)
+	{
+		if (pos.x + x >= 0 && pos.x + x <= SCREEN_WIDTH - 1 && pos.y + y >= 0 && pos.y + y <= SCREEN_HEIGHT - 1)
+			DrawLine(0, 0, (int)pos.x + x, (int)pos.y + y);
+		if ((int)pos.x + x >= 0 && (int)pos.x + x <= SCREEN_WIDTH - 1 && (int)pos.y - y >= 0 && (int)pos.y - y <= SCREEN_HEIGHT - 1)
+			DrawLine(0, 0, (int)pos.x + x, (int)pos.y - y);
+		if ((int)pos.x - x >= 0 && (int)pos.x - x <= SCREEN_WIDTH - 1 && (int)pos.y + y >= 0 && (int)pos.y + y <= SCREEN_HEIGHT - 1)
+			DrawLine(0, 0, (int)pos.x - x, (int)pos.y + y);
+		if ((int)pos.x - x >= 0 && (int)pos.x - x <= SCREEN_WIDTH - 1 && (int)pos.y - y >= 0 && (int)pos.y - y <= SCREEN_HEIGHT - 1)
+			DrawLine(0, 0, (int)pos.x - x, (int)pos.y - y);
+		if ((int)pos.x + y >= 0 && (int)pos.x + y <= SCREEN_WIDTH - 1 && (int)pos.y + x >= 0 && (int)pos.y + x <= SCREEN_HEIGHT - 1)
+			DrawLine(0, 0, (int)pos.x + y, (int)pos.y + x);
+		if ((int)pos.x + y >= 0 && (int)pos.x + y <= SCREEN_WIDTH - 1 && (int)pos.y - x >= 0 && (int)pos.y - x <= SCREEN_HEIGHT - 1)
+			DrawLine(0, 0, (int)pos.x + y, (int)pos.y - x);
+		if ((int)pos.x - y >= 0 && (int)pos.x - y <= SCREEN_WIDTH - 1 && (int)pos.y + x >= 0 && (int)pos.y + x <= SCREEN_HEIGHT - 1)
+			DrawLine(0, 0, (int)pos.x - y, (int)pos.y + x);
+		if ((int)pos.x - y >= 0 && (int)pos.x - y <= SCREEN_WIDTH - 1 && (int)pos.y - x >= 0 && (int)pos.y - x <= SCREEN_HEIGHT - 1)
+			DrawLine(0, 0, (int)pos.x - y, (int)pos.y - x);
+
+		if (d < 0) {
+			d += 2 * x + 1;
+		}
+		else {
+			d += 2 * (x - y) + 1;
+			y--;
+		}
+		x++;
+	}
+	*/
+
+	if (rad < 0)
+		rad *= -1;
+
+	int d = (5 - rad * 4) / 4;
+	int x = 0;
+	int y = rad;
+
+	while (x <= y)
+	{
+		if (pos.x + x >= 0 && pos.x + x <= SCREEN_WIDTH - 1 && pos.y + y >= 0 && pos.y + y <= SCREEN_HEIGHT - 1)
+			DrawLine((int)pos.x, (int)pos.y, (int)pos.x + x, (int)pos.y + y);
+		if ((int)pos.x + x >= 0 && (int)pos.x + x <= SCREEN_WIDTH - 1 && (int)pos.y - y >= 0 && (int)pos.y - y <= SCREEN_HEIGHT - 1)
+			DrawLine((int)pos.x, (int)pos.y, (int)pos.x + x, (int)pos.y - y);
+		if ((int)pos.x - x >= 0 && (int)pos.x - x <= SCREEN_WIDTH - 1 && (int)pos.y + y >= 0 && (int)pos.y + y <= SCREEN_HEIGHT - 1)
+			DrawLine((int)pos.x, (int)pos.y, (int)pos.x - x, (int)pos.y + y);
+		if ((int)pos.x - x >= 0 && (int)pos.x - x <= SCREEN_WIDTH - 1 && (int)pos.y - y >= 0 && (int)pos.y - y <= SCREEN_HEIGHT - 1)
+			DrawLine((int)pos.x, (int)pos.y, (int)pos.x - x, (int)pos.y - y);
+		if ((int)pos.x + y >= 0 && (int)pos.x + y <= SCREEN_WIDTH - 1 && (int)pos.y + x >= 0 && (int)pos.y + x <= SCREEN_HEIGHT - 1)
+			DrawLine((int)pos.x, (int)pos.y, (int)pos.x + y, (int)pos.y + x);
+		if ((int)pos.x + y >= 0 && (int)pos.x + y <= SCREEN_WIDTH - 1 && (int)pos.y - x >= 0 && (int)pos.y - x <= SCREEN_HEIGHT - 1)
+			DrawLine((int)pos.x, (int)pos.y, (int)pos.x + y, (int)pos.y - x);
+		if ((int)pos.x - y >= 0 && (int)pos.x - y <= SCREEN_WIDTH - 1 && (int)pos.y + x >= 0 && (int)pos.y + x <= SCREEN_HEIGHT - 1)
+			DrawLine((int)pos.x, (int)pos.y, (int)pos.x - y, (int)pos.y + x);
+		if ((int)pos.x - y >= 0 && (int)pos.x - y <= SCREEN_WIDTH - 1 && (int)pos.y - x >= 0 && (int)pos.y - x <= SCREEN_HEIGHT - 1)
+			DrawLine((int)pos.x, (int)pos.y, (int)pos.x - y, (int)pos.y - x);
+
+		if (d < 0) {
+			d += 2 * x + 1;
+		}
+		else {
+			d += 2 * (x - y) + 1;
+			y--;
+		}
+		x++;
+	}
+
 }
 
 void ASurface::DrawRect(Vector2D pos, int w, int h)
@@ -156,7 +283,7 @@ Vector2D ASurface::GetTextDimensions(std::string text)
 	int w;
 	int h;
 	TTF_SizeText(currentFont->font, text.c_str(), &w, &h);
-	return Vector2D(w, h);
+	return Vector2D((float)w, (float)h);
 }
 
 void ASurface::DrawText(std::string text, Vector2D pos, double angle, Color _color)
@@ -170,7 +297,12 @@ void ASurface::DrawText(std::string text, Vector2D pos, double angle, Color _col
 	renderDrawTexturedRect(Vector2D(0, 0), (int)(textDim.x/32), (int)(textDim.y/32));
 	*/
 
-	ATexture textTexture(TTF_RenderText_Solid(currentFont->font, text.c_str(), SDL_Color{ 0, 0, 0 }));
+	ATexture textTexture(TTF_RenderText_Solid(currentFont->font, text.c_str(), SDL_Color{ _color.r, _color.g, _color.b, _color.a }));
+	if (_color.a < 255)
+	{
+		textTexture.setBlendMode(SDL_BLENDMODE_BLEND);
+		textTexture.setAlpha(_color.a);
+	}
 
 	int w = textTexture.getWidth();
 	int h = textTexture.getHeight();
@@ -190,4 +322,21 @@ void ASurface::SetTexture(ATexture* _texture)
 	texture->load(path);
 	*/
 	texture = _texture;
+}
+
+void ASurface::SetBlendMode(SDL_BlendMode _blendMode)
+{
+	curBlendMode = _blendMode;
+	SDL_SetRenderDrawBlendMode(gRenderer, curBlendMode);
+}
+
+void ASurface::SetAlpha(int _alpha)
+{
+	curAlpha = _alpha;
+}
+
+void ASurface::SetColor(Color _color)
+{
+	curColor = _color;
+	SDL_SetRenderDrawColor(gRenderer, curColor.r, curColor.g, curColor.b, curColor.a);
 }

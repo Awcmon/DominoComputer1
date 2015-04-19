@@ -4,13 +4,15 @@
 Color::Color()
 {
 	r, g, b = 0;
+	a = 255;
 }
 
-Color::Color(int _r, int _g, int _b)
+Color::Color(int _r, int _g, int _b, int _a)
 {
 	r = _r;
 	g = _g;
 	b = _b;
+	a = _a;
 }
 
 //Add two colors
@@ -34,33 +36,33 @@ Color operator-(const Color& color, const Color& color2)
 }
 
 //Multiplies a color with an integer
-Color operator*(const Color& color, int a)
+Color operator*(const Color& color, int num)
 {
 	Color c;
-	c.r = color.r * a;
-	c.g = color.g * a;
-	c.b = color.b * a;
+	c.r = color.r * num;
+	c.g = color.g * num;
+	c.b = color.b * num;
 	return c;
 }
 
 //Multiplies a color with an integer
-Color operator*(int a, const Color& color)
+Color operator*(int num, const Color& color)
 {
 	Color c;
-	c.r = color.r * a;
-	c.g = color.g * a;
-	c.b = color.b * a;
+	c.r = color.r * num;
+	c.g = color.g * num;
+	c.b = color.b * num;
 	return c;
 }
 
 //Divides a color through an integer
-Color operator/(const Color& color, int a)
+Color operator/(const Color& color, int num)
 {
-	if (a == 0) return color;
+	if (num == 0) return color;
 	Color c;
-	c.r = color.r / a;
-	c.g = color.g / a;
-	c.b = color.b / a;
+	c.r = color.r / num;
+	c.g = color.g / num;
+	c.b = color.b / num;
 	return c;
 }
 

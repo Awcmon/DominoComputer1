@@ -3,16 +3,16 @@
 class Color
 {
 public:
-	int r, g, b;
+	int r, g, b, a;
 	Color();
-	Color(int _r, int _g, int _b);
+	Color(int _r, int _g, int _b, int _a = 255);
 };
 
 Color operator+(const Color& color, const Color& color2);
 Color operator-(const Color& color, const Color& color2);
-Color operator*(const Color& color, int a);
-Color operator*(int a, const Color& color);
-Color operator/(const Color& color, int a);
+Color operator*(const Color& color, int num);
+Color operator*(int num, const Color& color);
+Color operator/(const Color& color, int num);
 bool operator==(const Color& color, const Color& color2);
 bool operator!=(const Color& color, const Color& color2);
 

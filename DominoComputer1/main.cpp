@@ -85,6 +85,8 @@ int main(int argc, char* args[])
 
 	int lastUpdate = 0;
 
+	int delay = 0;
+
 	/*Test test 1
 	SDL_Color textColor = { 0, 0, 0 };
 	AFont gfont("resource/FFFBusiness.ttf", 32);
@@ -92,6 +94,7 @@ int main(int argc, char* args[])
 	*/
 
 	surface.CreateFont("FFFBusiness32", "resource/FFFBusiness.ttf", 32);
+	surface.CreateFont("FFFBusiness16", "resource/FFFBusiness.ttf", 16);
 
 	while (!quit)
 	{
@@ -153,7 +156,6 @@ int main(int argc, char* args[])
 						SimReset();
 						simState = -1;
 						printf("Stopped.\n");
-						break;
 					}
 					else
 					{
@@ -162,6 +164,13 @@ int main(int argc, char* args[])
 						simState = 1;
 						printf("Started.\n");
 					}
+					break;
+				case SDLK_EQUALS:
+					updateDelay = Clamp(updateDelay + 25, 0, 1000);
+					break;
+				case SDLK_MINUS:
+					updateDelay = Clamp(updateDelay - 25, 0, 1000);
+					break;
 				}
 			}
 		}
@@ -289,15 +298,37 @@ int main(int argc, char* args[])
 		renderDrawTexturedRect(Vector2D(0, 0), (int)(textDim.x/32), (int)(textDim.y/32));
 		*/
 
-		//Text test 3
+		/*Text test 3
 		surface.SetFont("FFFBusiness32");
-		surface.DrawText("Test message.", Vector2D(10, 10));
-
-
+		surface.DrawText("Test message.", Pos2Scr(Vector2D(0, 0)) + Vector2D(RandInt(-3, 3), RandInt(-3, 3)), 0, Color(0, 0, 0, RandInt(50, 150)));
+		*/
 
 		//Draw Mouse
 		SDL_SetRenderDrawColor(gRenderer, 50, 50, 50, 0xFF);
 		renderDrawRect(mpos, 1, 1);
+
+		/*Fancy text displays for the user to know whats going on I guess.*/
+		//Sim status
+		surface.SetFont("FFFBusiness16");
+		if (simState == 0)
+		{
+			surface.DrawText("PAUSED", Vector2D(0, 0), 0, Color(100, 100, 100, 200));
+		}
+		else if (simState == 1)
+		{
+			surface.DrawText("RUNNING", Vector2D(0, 0), 0, Color(100, 120, 100, 200));
+		}
+		else
+		{
+			surface.DrawText("STOPPED", Vector2D(0, 0), 0, Color(100, 100, 100, 200));
+		}
+		//Grid pos
+		surface.DrawText("X: " + std::to_string((int)mpos.x) + "     Y: " + std::to_string((int)mpos.y), Vector2D(0, 30), 0, Color(100, 100, 100, 200));
+
+		surface.DrawText("Nodes: " + std::to_string((int)nodes.size()), Vector2D(0, 50), 0, Color(100, 100, 100, 200));
+		surface.DrawText("Updates/Second: "+std::to_string(1000/Clamp(updateDelay, MS_PER_FRAME, 100000)), Vector2D(0, 70), 0, Color(100, 100, 100, 200));
+		surface.DrawText("Last Delay: " + std::to_string(delay), Vector2D(0, 90), 0, Color(100, 100, 100, 200));
+		
 
 		SDL_RenderPresent(gRenderer);
 
@@ -310,13 +341,12 @@ int main(int argc, char* args[])
 
 		if (!quit)
 		{
-			int delay = start + MS_PER_FRAME - SDL_GetTicks();
+			delay = start + MS_PER_FRAME - SDL_GetTicks();
 			if (delay > 0)
 			{
 				SDL_Delay(delay);
 			}
 		}
-
 	}
 
 	window.free();

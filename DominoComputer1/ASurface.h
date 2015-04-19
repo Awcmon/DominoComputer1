@@ -9,6 +9,8 @@
 #include "AwcColor.h"
 
 extern SDL_Renderer* gRenderer;
+extern int SCREEN_WIDTH;
+extern int SCREEN_HEIGHT;
 
 class ASurface
 {
@@ -18,7 +20,11 @@ public:
 
 	//Geometric primitives
 	void DrawPoint(Vector2D pos);
+	void DrawPoint(int x, int y);
 	void DrawLine(Vector2D p1, Vector2D p2);
+	void DrawLine(int x1, int y1, int x2, int y2);
+	void DrawCircle(Vector2D pos, int rad = 200);
+	void DrawCircleFill(Vector2D pos, int rad = 200);
 	void DrawRect(Vector2D pos, int w, int h);
 	void DrawFillRect(Vector2D pos, int w, int h);
 	void DrawQuad(Vector2D p1, Vector2D p2);
@@ -39,10 +45,18 @@ public:
 
 	//Setting stuff
 	void SetTexture(ATexture* _texture);
+	void SetBlendMode(SDL_BlendMode _blendMode);
+	void SetAlpha(int _alpha);
+	void SetColor(Color _color);
 
 private:
 	ATexture* texture;
 
+	Color curColor;
+	SDL_BlendMode curBlendMode;
+	int curAlpha;
+
+	//Font stuff
 	std::map<std::string, AFont*> fontMap;
 	AFont* currentFont;
 };
