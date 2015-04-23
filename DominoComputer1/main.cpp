@@ -16,6 +16,8 @@
 #include "ASurface.h"
 #include "Node.h"
 #include "AFont.h"
+#include "AInputEvent.h"
+#include "AKeyboard.h"
 
 #define FRAMES_PER_SECOND 120
 #define MS_PER_FRAME 8
@@ -41,6 +43,12 @@ std::map<Vector2D, Node*> nodeMap;
 int simState;
 
 AMouse mouse;
+AKeyboard keyboard;
+
+bool nodeCompare(Node *a, Node *b)
+{
+	return (a->pos < b->pos);
+}
 
 void SimReset()
 {
@@ -68,6 +76,7 @@ void SimReset()
 			PushNode(nodes[i], curActiveNodes);
 		}
 	}
+	//std::sort(nodes.begin(), nodes.end(), nodeCompare);
 	printf("CurSize %d\n", curActiveNodes.size());
 }
 
@@ -75,8 +84,11 @@ void SimReset()
 int main(int argc, char* args[])
 {
 	AWindow window;
+	AInputEvent input;
+	mouse.setInputEvent(&input);
+	keyboard.setInputEvent(&input);
 
-	SDL_Event e;
+//	SDL_Event e;
 
 	bool quit = false;
 
@@ -93,6 +105,9 @@ int main(int argc, char* args[])
 	ATexture text(TTF_RenderText_Solid(gfont.font, "rip", textColor));
 	*/
 
+	surface.CreateFont("Default", "resource/Roboto-Regular.ttf", 16);
+	surface.CreateFont("DefaultLarge", "resource/Roboto-Regular.ttf", 24);
+
 	surface.CreateFont("FFFBusiness32", "resource/FFFBusiness.ttf", 32);
 	surface.CreateFont("FFFBusiness16", "resource/FFFBusiness.ttf", 16);
 
@@ -100,10 +115,81 @@ int main(int argc, char* args[])
 	{
 		int start = SDL_GetTicks();
 
+		input.think();
 		mouse.think();
+		keyboard.think();
 		//Grid pos the mouse is on.
 		Vector2D mpos(round(Scr2Pos(mouse.pos).x), round(Scr2Pos(mouse.pos).y));
 
+		if (input.isEvent(SDL_QUIT))
+		{
+			quit = true;
+		}
+
+		//Control zoom
+		if (mouse.mWheelY < 0)
+		{
+			PPM -= Clamp((int)round(PPM / 8), 1, 1000);
+			PPM = Clamp(PPM, 1, 1000);
+		}
+		else if (mouse.mWheelY > 0)
+		{
+			PPM += Clamp((int)round(PPM / 8), 1, 1000);
+			PPM = Clamp(PPM, 1, 1000);
+		}
+
+		//Control simulation
+		if (input.keyDown(SDLK_SPACE))
+		{
+			if (simState == -1)
+			{
+				//Start simulation
+				SimReset();
+				simState = 1;
+				printf("Started.\n");
+			}
+			else if (simState == 0)
+			{
+				simState = 1;
+				printf("Resumed.\n");
+			}
+			else
+			{
+				//Pause
+				simState = 0;
+				printf("Paused.\n");
+			}
+		}
+		else if (input.keyDown(SDLK_r))
+		{
+			if (simState != -1)
+			{
+				//Stop sim.
+				SimReset();
+				simState = -1;
+				printf("Stopped.\n");
+			}
+			else
+			{
+				//Start simulation
+				SimReset();
+				simState = 1;
+				printf("Started.\n");
+			}
+		}
+
+		//Control simulation speed
+		if (input.keyDown(SDLK_MINUS))
+		{
+			updateDelay = Clamp(updateDelay + 25, 0, 1000);
+		}
+		if (input.keyDown(SDLK_EQUALS))
+		{
+			updateDelay = Clamp(updateDelay - 25, 0, 1000);
+		}
+
+		
+		/*
 		while (SDL_PollEvent(&e) != 0)
 		{
 			if (e.type == SDL_QUIT)
@@ -174,6 +260,7 @@ int main(int argc, char* args[])
 				}
 			}
 		}
+		*/
 
 		//Node logic if simulation is running and it is time to update.
 		if (simState == 1 && ((lastUpdate + updateDelay) < (int)SDL_GetTicks()))
@@ -221,7 +308,7 @@ int main(int argc, char* args[])
 					printf("Node removed, Num nodes: %d\n", nodes.size() - 1);
 				}
 
-				if (isFilled && mouse.m1down)
+				if (isFilled && mouse.m1pressed)
 				{
 					if (nodes[fillID]->val == 1)
 					{
@@ -235,22 +322,20 @@ int main(int argc, char* args[])
 			}
 		}
 
-		const Uint8 *state = SDL_GetKeyboardState(NULL);
-
 		float vel = 2 / (float)sqrt(PPM);
-		if (state[SDL_SCANCODE_A])
+		if (keyboard.keyDown(SDL_SCANCODE_A))
 		{
 			camPos.x -= vel;
 		}
-		if (state[SDL_SCANCODE_D])
+		if (keyboard.keyDown(SDL_SCANCODE_D))
 		{
 			camPos.x += vel;
 		}
-		if (state[SDL_SCANCODE_W])
+		if (keyboard.keyDown(SDL_SCANCODE_W))
 		{
 			camPos.y += vel;
 		}
-		if (state[SDL_SCANCODE_S])
+		if (keyboard.keyDown(SDL_SCANCODE_S))
 		{
 			camPos.y -= vel;
 		}
@@ -309,7 +394,7 @@ int main(int argc, char* args[])
 
 		/*Fancy text displays for the user to know whats going on I guess.*/
 		//Sim status
-		surface.SetFont("FFFBusiness16");
+		surface.SetFont("DefaultLarge");
 		if (simState == 0)
 		{
 			surface.DrawText("PAUSED", Vector2D(0, 0), 0, Color(100, 100, 100, 200));
@@ -322,13 +407,14 @@ int main(int argc, char* args[])
 		{
 			surface.DrawText("STOPPED", Vector2D(0, 0), 0, Color(100, 100, 100, 200));
 		}
+		surface.SetFont("Default");
 		//Grid pos
 		surface.DrawText("X: " + std::to_string((int)mpos.x) + "     Y: " + std::to_string((int)mpos.y), Vector2D(0, 30), 0, Color(100, 100, 100, 200));
 
 		surface.DrawText("Nodes: " + std::to_string((int)nodes.size()), Vector2D(0, 50), 0, Color(100, 100, 100, 200));
-		surface.DrawText("Updates/Second: "+std::to_string(1000/Clamp(updateDelay, MS_PER_FRAME, 100000)), Vector2D(0, 70), 0, Color(100, 100, 100, 200));
-		surface.DrawText("Last Delay: " + std::to_string(delay), Vector2D(0, 90), 0, Color(100, 100, 100, 200));
-		
+		surface.DrawText("PPM: " + std::to_string(PPM), Vector2D(0, 70), 0, Color(100, 100, 100, 200));
+		surface.DrawText("Updates/Second: "+std::to_string(1000/Clamp(updateDelay, MS_PER_FRAME, 100000)), Vector2D(0, 90), 0, Color(100, 100, 100, 200));
+		surface.DrawText("Last Delay: " + std::to_string(delay), Vector2D(0, 110), 0, Color(100, 100, 100, 200));
 
 		SDL_RenderPresent(gRenderer);
 

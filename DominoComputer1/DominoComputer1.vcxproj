@@ -77,6 +77,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AFont.cpp" />
+    <ClCompile Include="AInputEvent.cpp" />
+    <ClCompile Include="AKeyboard.cpp" />
     <ClCompile Include="AMouse.cpp" />
     <ClCompile Include="ARender.cpp" />
     <ClCompile Include="ASurface.cpp" />
@@ -90,6 +92,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AFont.h" />
+    <ClInclude Include="AInputEvent.h" />
+    <ClInclude Include="AKeyboard.h" />
     <ClInclude Include="AMouse.h" />
     <ClInclude Include="ARender.h" />
     <ClInclude Include="ASurface.h" />

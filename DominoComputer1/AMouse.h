@@ -1,13 +1,17 @@
 #pragma once
 
 #include <SDL.h>
+#include "AInputEvent.h"
 #include "AwcVector2D.h"
 
 class AMouse
 {
 public:
 	AMouse();
+	AMouse(AInputEvent* _inputEvent);
 	~AMouse();
+
+	void setInputEvent(AInputEvent* _inputEvent);
 
 	void think();
 
@@ -15,21 +19,17 @@ public:
 	Vector2D downPos;
 	Vector2D upPos;
 
-	//M1 Vars
-	bool m1down;
+	//
 	bool m1isDown;
-	bool m1up;
-	//M2 Vars
-	bool m2down;
+	bool m1pressed;
+	bool m1released;
 	bool m2isDown;
-	bool m2up;
+	bool m2pressed;
+	bool m2released;
+	//Mouse wheel vars
+	int mWheelY;
 
 private:
-	//M1 control vars
-	bool m1downCont;
-	bool m1upCont;
-	//M2 control vars
-	bool m2downCont;
-	bool m2upCont;
+	AInputEvent* inputEvent;
 };
 

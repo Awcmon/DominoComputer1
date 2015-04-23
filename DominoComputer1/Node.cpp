@@ -78,34 +78,39 @@ void Node::remove()
 
 }
 
+void Node::findAdjacent()
+{
+	//Find adjacent nodes
+	/*old method that looped through all and checked pos
+	for (int i = 0; i < (int)nodes.size(); i++)
+	{
+		for (int k = 0; k < 8; k++)
+		{
+			Vector2D cpos(pos.x + round(cos(k*(Pi() / 4))), pos.y + round(sin(k*(Pi() / 4))));
+			if (nodes[i]->pos == cpos)
+			{
+				PushNode(nodes[i], adjacent);
+			}
+		}
+	}
+	*/
+
+	//Using maps
+	for (int i = 0; i < 8; i++)
+	{
+		Vector2D cpos(pos.x + round(cos(i*(Pi() / 4))), pos.y + round(sin(i*(Pi() / 4))));
+		if (nodeMap[cpos] != NULL)
+		{
+			PushNode(nodeMap[cpos], adjacent);
+		}
+	}
+}
+
 int Node::think()
 {
 	if ((val == 2) || (val == 3))
 	{
-		//Find adjacent nodes
-		/*old method that looped through all and checked pos
-		for (int i = 0; i < (int)nodes.size(); i++)
-		{
-			for (int k = 0; k < 8; k++)
-			{
-				Vector2D cpos(pos.x + round(cos(k*(Pi() / 4))), pos.y + round(sin(k*(Pi() / 4))));
-				if (nodes[i]->pos == cpos)
-				{
-					PushNode(nodes[i], adjacent);
-				}
-			}
-		}
-		*/
-
-		//Using maps
-		for (int i = 0; i < 8; i++)
-		{
-			Vector2D cpos(pos.x + round(cos(i*(Pi() / 4))), pos.y + round(sin(i*(Pi() / 4))));
-			if (nodeMap[cpos] != NULL)
-			{
-				PushNode(nodeMap[cpos], adjacent);
-			}
-		}
+		findAdjacent();
 		
 		//if input node
 		if (val == 3)

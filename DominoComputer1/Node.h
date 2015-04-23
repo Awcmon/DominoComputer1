@@ -18,6 +18,8 @@ public:
 	Vector2D setPos(Vector2D _pos);
 	void remove();
 
+	void findAdjacent();
+
 	int think();	//return 0 for error, 1 for okay.
 	void render();
 
