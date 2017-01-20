@@ -37,17 +37,20 @@ public:
 	//Fonts and text
 	void CreateFont(std::string name, std::string path, int size);
 	void SetFont(std::string fontname);
+	AFont* GetFont();
 	ATexture* GetTextTexture(std::string text, Color _color = Color(0,0,0));
 	int GetTextWidth(std::string text);
 	int GetTextHeight(std::string text);
 	Vector2D GetTextDimensions(std::string text);
-	void DrawText(std::string text, Vector2D pos, double angle = 0.0, Color _color = Color(0, 0, 0));
+	void DrawText(std::string text, Vector2D pos, double angle = 0.0);
 
 	//Setting stuff
 	void SetTexture(ATexture* _texture);
+	ATexture* GetTexture();
 	void SetBlendMode(SDL_BlendMode _blendMode);
 	void SetAlpha(int _alpha);
 	void SetColor(Color _color);
+	Color GetColor();
 
 private:
 	ATexture* texture;

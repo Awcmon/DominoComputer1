@@ -257,6 +257,11 @@ void ASurface::SetFont(std::string fontname)
 	currentFont = fontMap[fontname];
 }
 
+AFont* ASurface::GetFont()
+{
+	return currentFont;
+}
+
 ATexture* ASurface::GetTextTexture(std::string text, Color _color)
 {
 	return new ATexture(TTF_RenderText_Solid(currentFont->font, text.c_str(), SDL_Color{ 0, 0, 0 }));
@@ -286,7 +291,7 @@ Vector2D ASurface::GetTextDimensions(std::string text)
 	return Vector2D((float)w, (float)h);
 }
 
-void ASurface::DrawText(std::string text, Vector2D pos, double angle, Color _color)
+void ASurface::DrawText(std::string text, Vector2D pos, double angle)
 {
 	/*Text test 2
 	surface.SetFont("FFFBusiness32");
@@ -297,11 +302,11 @@ void ASurface::DrawText(std::string text, Vector2D pos, double angle, Color _col
 	renderDrawTexturedRect(Vector2D(0, 0), (int)(textDim.x/32), (int)(textDim.y/32));
 	*/
 
-	ATexture textTexture(TTF_RenderText_Solid(currentFont->font, text.c_str(), SDL_Color{ _color.r, _color.g, _color.b, _color.a }));
-	if (_color.a < 255)
+	ATexture textTexture(TTF_RenderText_Solid(currentFont->font, text.c_str(), curColor.toSDL()));
+	if (curColor.a < 255)
 	{
 		textTexture.setBlendMode(SDL_BLENDMODE_BLEND);
-		textTexture.setAlpha(_color.a);
+		textTexture.setAlpha(curColor.a);
 	}
 
 	int w = textTexture.getWidth();
@@ -324,6 +329,11 @@ void ASurface::SetTexture(ATexture* _texture)
 	texture = _texture;
 }
 
+ATexture* ASurface::GetTexture()
+{
+	return texture;
+}
+
 void ASurface::SetBlendMode(SDL_BlendMode _blendMode)
 {
 	curBlendMode = _blendMode;
@@ -339,4 +349,9 @@ void ASurface::SetColor(Color _color)
 {
 	curColor = _color;
 	SDL_SetRenderDrawColor(gRenderer, curColor.r, curColor.g, curColor.b, curColor.a);
+}
+
+Color ASurface::GetColor()
+{
+	return curColor;
 }

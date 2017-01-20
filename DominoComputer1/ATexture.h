@@ -14,6 +14,8 @@ class ATexture
 	ATexture(SDL_Surface *sourceSurface);
 	~ATexture();
 
+	bool createBlank(int _w, int _h, SDL_TextureAccess access);
+
 	bool load(std::string path, Color colorkey = Color(255, 0, 255));
 	bool createFromSurface(SDL_Surface *sourceSurface);
 	void free();
@@ -29,7 +31,7 @@ class ATexture
 	void render(int x, int y, double angle = 0.0, SDL_Point* center = NULL, SDL_Rect* clip = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
 
 	private:
-	int width;
-	int height;
+	int w;
+	int h;
 	SDL_Texture *mTexture;
 };

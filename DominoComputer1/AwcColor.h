@@ -1,11 +1,17 @@
 #pragma once
 
+#include <SDL.h>
+
 class Color
 {
 public:
 	int r, g, b, a;
 	Color();
 	Color(int _r, int _g, int _b, int _a = 255);
+
+	#ifdef _SDL_H
+		SDL_Color toSDL();
+	#endif
 };
 
 Color operator+(const Color& color, const Color& color2);

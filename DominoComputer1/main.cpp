@@ -18,6 +18,7 @@
 #include "AFont.h"
 #include "AInputEvent.h"
 #include "AKeyboard.h"
+#include "ACamera.h"
 
 #define FRAMES_PER_SECOND 120
 #define MS_PER_FRAME 8
@@ -44,6 +45,8 @@ int simState;
 
 AMouse mouse;
 AKeyboard keyboard;
+
+ACamera *camera = NULL;
 
 bool nodeCompare(Node *a, Node *b)
 {
@@ -84,6 +87,9 @@ void SimReset()
 int main(int argc, char* args[])
 {
 	AWindow window;
+
+	camera = new ACamera();
+
 	AInputEvent input;
 	mouse.setInputEvent(&input);
 	keyboard.setInputEvent(&input);
@@ -105,11 +111,15 @@ int main(int argc, char* args[])
 	ATexture text(TTF_RenderText_Solid(gfont.font, "rip", textColor));
 	*/
 
+	surface.CreateFont("DefaultSmall", "resource/Roboto-Regular.ttf", 8);
 	surface.CreateFont("Default", "resource/Roboto-Regular.ttf", 16);
 	surface.CreateFont("DefaultLarge", "resource/Roboto-Regular.ttf", 24);
+	surface.CreateFont("DefaultLarger", "resource/Roboto-Regular.ttf", 32);
 
 	surface.CreateFont("FFFBusiness32", "resource/FFFBusiness.ttf", 32);
 	surface.CreateFont("FFFBusiness16", "resource/FFFBusiness.ttf", 16);
+
+	float shake = 0;
 
 	while (!quit)
 	{
@@ -118,6 +128,9 @@ int main(int argc, char* args[])
 		input.think();
 		mouse.think();
 		keyboard.think();
+
+		camera->think();
+		camPos = camera->pos;
 		//Grid pos the mouse is on.
 		Vector2D mpos(round(Scr2Pos(mouse.pos).x), round(Scr2Pos(mouse.pos).y));
 
@@ -137,9 +150,9 @@ int main(int argc, char* args[])
 			PPM += Clamp((int)round(PPM / 8), 1, 1000);
 			PPM = Clamp(PPM, 1, 1000);
 		}
-
+		
 		//Control simulation
-		if (input.keyDown(SDLK_SPACE))
+		if (keyboard.scanPressed(SDL_SCANCODE_SPACE))
 		{
 			if (simState == -1)
 			{
@@ -160,7 +173,7 @@ int main(int argc, char* args[])
 				printf("Paused.\n");
 			}
 		}
-		else if (input.keyDown(SDLK_r))
+		else if (keyboard.scanPressed(SDL_SCANCODE_R))
 		{
 			if (simState != -1)
 			{
@@ -179,88 +192,28 @@ int main(int argc, char* args[])
 		}
 
 		//Control simulation speed
-		if (input.keyDown(SDLK_MINUS))
+		if (keyboard.keyInput(SDLK_MINUS))
 		{
 			updateDelay = Clamp(updateDelay + 25, 0, 1000);
 		}
-		if (input.keyDown(SDLK_EQUALS))
+		if (keyboard.keyInput(SDLK_EQUALS))
 		{
 			updateDelay = Clamp(updateDelay - 25, 0, 1000);
 		}
 
 		
-		/*
-		while (SDL_PollEvent(&e) != 0)
+		if (keyboard.scanPressed(SDL_SCANCODE_Y))
 		{
-			if (e.type == SDL_QUIT)
+			keyboard.startTextInput();
+		}
+		if (SDL_IsTextInputActive())
+		{
+			if (input.keyPressed(SDLK_ESCAPE))
 			{
-				quit = true;
-			}
-
-			if (e.type == SDL_MOUSEWHEEL)
-			{
-				if (e.wheel.y < 0)
-				{
-					PPM -= Clamp((int)round(PPM/8),1,1000);
-				}
-				else if (e.wheel.y > 0)
-				{
-					PPM += Clamp((int)round(PPM/8),1,1000);
-				}
-				PPM = Clamp(PPM, 1, 1000);
-				printf("PPM: %d\n", PPM);
-			}
-
-			if (e.type == SDL_KEYDOWN)
-			{
-				switch (e.key.keysym.sym)
-				{
-				case SDLK_SPACE:
-					if (simState == -1)
-					{
-						//Start simulation
-						SimReset();
-						simState = 1;
-						printf("Started.\n");
-					}
-					else if (simState == 0)
-					{
-						simState = 1;
-						printf("Resumed.\n");
-					}
-					else
-					{
-						//Pause
-						simState = 0;
-						printf("Paused.\n");
-					}
-					break;
-				case SDLK_r:
-					if (simState != -1)
-					{
-						//Stop sim.
-						SimReset();
-						simState = -1;
-						printf("Stopped.\n");
-					}
-					else
-					{
-						//Start simulation
-						SimReset();
-						simState = 1;
-						printf("Started.\n");
-					}
-					break;
-				case SDLK_EQUALS:
-					updateDelay = Clamp(updateDelay + 25, 0, 1000);
-					break;
-				case SDLK_MINUS:
-					updateDelay = Clamp(updateDelay - 25, 0, 1000);
-					break;
-				}
+				keyboard.stopTextInput();
 			}
 		}
-		*/
+		
 
 		//Node logic if simulation is running and it is time to update.
 		if (simState == 1 && ((lastUpdate + updateDelay) < (int)SDL_GetTicks()))
@@ -301,11 +254,13 @@ int main(int argc, char* args[])
 					Node* newNode = new Node(mpos);
 					nodes.push_back(newNode);
 					printf("Node added, Num nodes: %d\n", nodes.size());
+					shake = Approach(shake, 10, 3);
 				}
 				else if (isFilled && mouse.m2isDown)
 				{
 					RemoveNode(nodes[fillID]);
 					printf("Node removed, Num nodes: %d\n", nodes.size() - 1);
+					shake = Approach(shake, 10, 3);
 				}
 
 				if (isFilled && mouse.m1pressed)
@@ -322,25 +277,11 @@ int main(int argc, char* args[])
 			}
 		}
 
-		float vel = 2 / (float)sqrt(PPM);
-		if (keyboard.keyDown(SDL_SCANCODE_A))
-		{
-			camPos.x -= vel;
-		}
-		if (keyboard.keyDown(SDL_SCANCODE_D))
-		{
-			camPos.x += vel;
-		}
-		if (keyboard.keyDown(SDL_SCANCODE_W))
-		{
-			camPos.y += vel;
-		}
-		if (keyboard.keyDown(SDL_SCANCODE_S))
-		{
-			camPos.y -= vel;
-		}
+		shake = Approach(shake, 0, 0.2f);
 
+		//RENDERING
 		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+		SDL_SetRenderTarget(gRenderer, camera->renderTarget->getTexture());
 		SDL_RenderClear(gRenderer);
 
 		//Render nodes.
@@ -397,25 +338,44 @@ int main(int argc, char* args[])
 		surface.SetFont("DefaultLarge");
 		if (simState == 0)
 		{
-			surface.DrawText("PAUSED", Vector2D(0, 0), 0, Color(100, 100, 100, 200));
+			surface.SetColor(Color(100, 100, 100, 200));
+			surface.DrawText("PAUSED", Vector2D(0, 0), 0);
 		}
 		else if (simState == 1)
 		{
-			surface.DrawText("RUNNING", Vector2D(0, 0), 0, Color(100, 120, 100, 200));
+			surface.SetColor(Color(100, 120, 100, 200));
+			surface.DrawText("RUNNING", Vector2D(0, 0), 0);
 		}
 		else
 		{
-			surface.DrawText("STOPPED", Vector2D(0, 0), 0, Color(100, 100, 100, 200));
+			surface.SetColor(Color(100, 100, 100, 200));
+			surface.DrawText("STOPPED", Vector2D(0, 0), 0);
 		}
 		surface.SetFont("Default");
+		surface.SetColor(Color(100, 100, 100, 200));
 		//Grid pos
-		surface.DrawText("X: " + std::to_string((int)mpos.x) + "     Y: " + std::to_string((int)mpos.y), Vector2D(0, 30), 0, Color(100, 100, 100, 200));
+		surface.DrawText("X: " + std::to_string((int)mpos.x) + "     Y: " + std::to_string((int)mpos.y), Vector2D(0, 30), 0);
 
-		surface.DrawText("Nodes: " + std::to_string((int)nodes.size()), Vector2D(0, 50), 0, Color(100, 100, 100, 200));
-		surface.DrawText("PPM: " + std::to_string(PPM), Vector2D(0, 70), 0, Color(100, 100, 100, 200));
-		surface.DrawText("Updates/Second: "+std::to_string(1000/Clamp(updateDelay, MS_PER_FRAME, 100000)), Vector2D(0, 90), 0, Color(100, 100, 100, 200));
-		surface.DrawText("Last Delay: " + std::to_string(delay), Vector2D(0, 110), 0, Color(100, 100, 100, 200));
+		surface.DrawText("Nodes: " + std::to_string((int)nodes.size()), Vector2D(0, 50), 0);
+		surface.DrawText("PPM: " + std::to_string(PPM), Vector2D(0, 70), 0);
+		surface.DrawText("Updates/Second: "+std::to_string(1000/Clamp(updateDelay, MS_PER_FRAME, 100000)), Vector2D(0, 90), 0);
+		surface.DrawText("Last Delay: " + std::to_string(delay), Vector2D(0, 110), 0);
 
+		surface.SetFont("Default");
+		renderDrawText("Testing a fairly long string here to see.", Vector2D(0, 0), 0.0f);
+
+		//Stop drawing to render target
+		SDL_SetRenderTarget(gRenderer, NULL);
+
+		//Black background
+		SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0xFF);
+		surface.DrawFillRect(Vector2D(0, 0), SCREEN_WIDTH, SCREEN_HEIGHT);
+
+		//Draw render target to screen
+		surface.SetTexture(camera->renderTarget);
+		surface.DrawTexturedRect(Vector2D(0, 0) + Vector2D(Random(-shake, shake), Random(-shake, shake)), SCREEN_WIDTH, SCREEN_HEIGHT, Random(-shake, shake));
+
+		//Render present
 		SDL_RenderPresent(gRenderer);
 
 		for (int i = 0; i < (int)nodesToRemove.size(); i++)

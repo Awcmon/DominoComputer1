@@ -16,14 +16,31 @@ public:
 	AInputEvent();
 	~AInputEvent();
 
+	//Event retrieval and stuff.
 	bool isEvent(int ev);
-	int mouseWheelY();
+	SDL_Event getEvent(int index);
+	SDL_Event* getEvents();
+	int* getEventTypes();
+	int numEvents();
+
+	//SDLK
 	bool keyDown(int _key);
+	bool keyInput(int _key);
 	bool keyPressed(int _key);
 	bool keyReleased(int _key);
+
+	//SDL_SCANCODE
+	bool scanDown(int _key);
+	bool scanInput(int _key);
+	bool scanPressed(int _key);
+	bool scanReleased(int _key);
+
+	//Mouse
 	bool mousePressed(int _button);
 	bool mouseReleased(int _button);
+	int mouseWheelY();
 
+	//Think
 	void think();
 
 private:
@@ -34,5 +51,7 @@ private:
 	SDL_Event events[MAX_EVENTS];
 
 	int eventsStored;
+
+	const Uint8 *keystate;
 };
 

@@ -15,6 +15,13 @@ Color::Color(int _r, int _g, int _b, int _a)
 	a = _a;
 }
 
+#ifdef _SDL_H
+	SDL_Color Color::toSDL()
+	{
+		return { r, g, b, a };
+	}
+#endif
+
 //Add two colors
 Color operator+(const Color& color, const Color& color2)
 {

@@ -5,15 +5,15 @@ extern SDL_Renderer* gRenderer;
 ATexture::ATexture()
 {
 	mTexture = NULL;
-	width = 0;
-	height = 0;
+	w = 0;
+	h = 0;
 }
 
 ATexture::ATexture(std::string path, Color colorkey)
 {
 	mTexture = NULL;
-	width = 0;
-	height = 0;
+	w = 0;
+	h = 0;
 
 	load(path, colorkey);
 }
@@ -21,8 +21,8 @@ ATexture::ATexture(std::string path, Color colorkey)
 ATexture::ATexture(SDL_Surface *sourceSurface)
 {
 	mTexture = NULL;
-	width = 0;
-	height = 0;
+	w = 0;
+	h = 0;
 
 	createFromSurface(sourceSurface);
 }
@@ -30,6 +30,22 @@ ATexture::ATexture(SDL_Surface *sourceSurface)
 ATexture::~ATexture()
 {
 	free();
+}
+
+bool ATexture::createBlank(int _w, int _h, SDL_TextureAccess access)
+{
+	mTexture = SDL_CreateTexture(gRenderer, SDL_PIXELFORMAT_RGBA8888, access, _w, _h);
+	if (mTexture == NULL)
+	{
+		printf("Unable to create blank texture! SDL Error: %s\n", SDL_GetError());
+	}
+	else
+	{
+		w = _w;
+		h = _h;
+	}
+
+	return mTexture != NULL;
 }
 
 bool ATexture::load(std::string path, Color colorkey)
@@ -47,8 +63,8 @@ bool ATexture::load(std::string path, Color colorkey)
 	}
 	else
 	{
-		width = loadedSurface->w;
-		height = loadedSurface->h;
+		w = loadedSurface->w;
+		h = loadedSurface->h;
 
 		SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, (Uint8)colorkey.r, (Uint8)colorkey.g, (Uint8)colorkey.b));
 
@@ -69,8 +85,8 @@ bool ATexture::createFromSurface(SDL_Surface *sourceSurface)
 	//Final texture
 	SDL_Texture* newTexture = NULL;
 
-	width = sourceSurface->w;
-	height = sourceSurface->h;
+	w = sourceSurface->w;
+	h = sourceSurface->h;
 
 	newTexture = SDL_CreateTextureFromSurface(gRenderer, sourceSurface);
 
@@ -86,8 +102,8 @@ void ATexture::free()
 	{
 		SDL_DestroyTexture(mTexture);
 		mTexture = NULL;
-		width = 0;
-		height = 0;
+		w = 0;
+		h = 0;
 	}
 }
 
@@ -98,12 +114,12 @@ SDL_Texture* ATexture::getTexture()
 
 int ATexture::getWidth()
 {
-	return width;
+	return w;
 }
 
 int ATexture::getHeight()
 {
-	return height;
+	return h;
 }
 
 void ATexture::setColor(Uint8 r, Uint8 g, Uint8 b)
@@ -124,7 +140,7 @@ void ATexture::setAlpha(Uint8 alpha)
 void ATexture::render(int x, int y, double angle, SDL_Point* center, SDL_Rect* clip, SDL_RendererFlip flip)
 {
 	//Set rendering space and render to screen
-	SDL_Rect renderQuad = { x, y, width, height };
+	SDL_Rect renderQuad = { x, y, w, h };
 
 	//Set clip rendering dimensions
 	if (clip != NULL)
